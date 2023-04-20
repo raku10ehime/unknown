@@ -51,8 +51,8 @@ spj = gpd.sjoin(pt_df, ehime)
 
 spj["id"] = spj["eNB"].astype(str) + "-" + spj["LCID"].astype(str)
 
-base = ehime.plot(color="white", edgecolor="black")
-spj.plot(ax=base, marker="o", color="red", markersize=5)
+# base = ehime.plot(color="white", edgecolor="black")
+# spj.plot(ax=base, marker="o", color="red", markersize=5)
 
 df_ehime = (
     spj.reindex(

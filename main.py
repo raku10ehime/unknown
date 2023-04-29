@@ -121,7 +121,7 @@ for i, r in df_ehime.iterrows():
     for j, t in df_tmp.iterrows():
         n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
 
-        if n < 2000:
+        if n < 3000:
             idx.append(i)
 
 unknown = df_ehime.drop(set(idx)).copy()

@@ -130,6 +130,7 @@ base = ehime.plot(color="white", edgecolor="black")
 unknown.plot(ax=base, marker="o", color="red", markersize=5)
 
 df_map = pd.read_csv("https://raku10ehime.github.io/map/ehime.csv", index_col=0).dropna(how="all")
+df_map["eNB-LCID"] = df_map["eNB-LCID"].fillna("unknown")
 
 # 地図
 

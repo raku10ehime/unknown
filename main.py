@@ -5,6 +5,8 @@ import folium.plugins
 import geopandas as gpd
 import pandas as pd
 
+import pyproj
+
 # MLS
 
 df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json")
@@ -18,13 +20,13 @@ df_mls[["eNB", "LCID"]] = df_mls["cell"].apply(lambda x: pd.Series([x >> 8, x & 
 df_mls["created"] = pd.to_datetime(df_mls["created"], unit="s")
 df_mls["updated"] = pd.to_datetime(df_mls["updated"], unit="s")
 
+# 90日以内
+
 dt_now = (
     pd.Timestamp.now(tz="Asia/Tokyo")
     .tz_localize(None)
     .replace(hour=0, minute=0, second=0, microsecond=0)
 )
-
-# 90日以内
 
 dt_90d = dt_now - pd.Timedelta(days=90)
 df_mls = df_mls[df_mls["updated"] > dt_90d].query("737280 <= eNB < 742280")
@@ -51,33 +53,33 @@ spj = gpd.sjoin(pt_df, ehime)
 
 spj["id"] = spj["eNB"].astype(str) + "-" + spj["LCID"].astype(str)
 
-# base = ehime.plot(color="white", edgecolor="black")
-# spj.plot(ax=base, marker="o", color="red", markersize=5)
+base = ehime.plot(color="white", edgecolor="black")
+spj.plot(ax=base, marker="o", color="red", markersize=5)
 
-df_ehime = (
-    spj.reindex(
-        columns=[
-            "area",
-            "lat",
-            "lon",
-            "created",
-            "updated",
-            "id",
-            "eNB",
-            "LCID",
-            "geometry",
-            "市区町村名",
-        ]
-    )
-    .reset_index(drop=True)
-    .copy()
-)
+df_ehime = spj.reindex(
+    columns=[
+        "area",
+        "lat",
+        "lon",
+        "created",
+        "updated",
+        "cell",
+        "id",
+        "eNB",
+        "LCID",
+        "geometry",
+        "市区町村名",
+    ]
+).query("737280 <= eNB < 742280")
+
+df_ehime.reset_index(drop=True, inplace=True)
 
 df_ehime
 
 # エリアマップ
 
 def enblcid_split(df0):
+
     df0["eNB-LCID"] = df0["eNB-LCID"].str.split()
     df1 = df0.explode("eNB-LCID")
 
@@ -86,29 +88,48 @@ def enblcid_split(df0):
     df1["LCID"] = df1["LCID"].str.split(",")
     df2 = df1.explode("LCID").astype({"eNB": int, "LCID": int})
 
-    df3 = df2.sort_values(["eNB", "LCID"]).reset_index(drop=True)
+    df2["cell"] = df2.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
+    df2[["lat", "lon"]] = df2["地図"].str.split(",", expand=True).astype(float)
 
-    df3["id"] = df3["eNB"].astype(str) + "-" + df3["LCID"].astype(str)
+    df3 = df2.sort_values(["cell"]).reset_index(drop=True)
 
     return df3
 
-
 # CSV
 
-csv_url = "https://raku10ehime.github.io/map/ehime.csv"
+csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN5xiHhlnPTkv3auHkYLT9NPvvjayj5AdPrH5VBQdbELOzfONi236Vub6eSshv8jAxQw3V1rgbbgE/pub?gid=882951423&single=true&output=csv"
 
-df_csv = pd.read_csv(csv_url, index_col=0).dropna(how="all")
-df_enb = enblcid_split(df_csv.dropna(subset=["eNB-LCID"]))
 
-unknown = df_ehime[
-    (~df_ehime["id"].isin(df_enb["id"])) & (df_ehime["LCID"] < 13)
-].copy()
+df_csv = pd.read_csv(
+    csv_url, parse_dates=["更新日時"], usecols=["ID", "更新日時", "場所", "eNB-LCID", "地図"]
+).dropna(how="all")
+
+df_enb = (
+    enblcid_split(df_csv.dropna(subset=["eNB-LCID"]))
+    .drop_duplicates(subset=["ID", "cell"], keep="last")
+    .sort_values(by=["cell", "更新日時"])
+    .reset_index(drop=True)
+)
+
+grs80 = pyproj.Geod(ellps="GRS80")
+
+idx = []
+
+for i, r in df_ehime.iterrows():
+    df_tmp = df_enb[df_enb["cell"] == r.cell].copy()
+
+    for j, t in df_tmp.iterrows():
+        n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
+
+        if n < 2000:
+            idx.append(i)
+
+unknown = df_ehime.drop(set(idx)).copy()
 
 base = ehime.plot(color="white", edgecolor="black")
 unknown.plot(ax=base, marker="o", color="red", markersize=5)
 
-df_csv["eNB-LCID"] = df_csv["eNB-LCID"].fillna("unknown")
-df_csv
+df_map = pd.read_csv("https://raku10ehime.github.io/map/ehime.csv", index_col=0).dropna(how="all")
 
 # 地図
 
@@ -159,7 +180,7 @@ for i, r in unknown.iterrows():
 
 fg2 = folium.FeatureGroup(name="基地局").add_to(map)
 
-for i, r in df_csv.iterrows():
+for i, r in df_map.iterrows():
     fg2.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],

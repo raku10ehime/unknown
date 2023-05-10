@@ -118,19 +118,13 @@ grs80 = pyproj.Geod(ellps="GRS80")
 idx = []
 
 for i, r in df_ehime.iterrows():
-
     df_tmp = df_enb[df_enb["cell"] == r.cell].copy()
 
-    if len(df_tmp) > 0:
+    for j, t in df_tmp.iterrows():
+        n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
 
-        for j, t in df_tmp.iterrows():
-            n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
-
-            if n < 3000:
-                idx.append(i)
-
-    else:
-        idx.append(i)
+        if n < 3000:
+            idx.append(i)
 
 unknown = df_ehime.drop(set(idx)).copy()
 

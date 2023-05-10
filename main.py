@@ -25,7 +25,6 @@ df_mls["updated"] = pd.to_datetime(df_mls["updated"], unit="s")
 dt_now = (
     pd.Timestamp.now(tz="Asia/Tokyo")
     .tz_localize(None)
-    .replace(hour=0, minute=0, second=0, microsecond=0)
 )
 
 dt_90d = dt_now - pd.Timedelta(days=90)
@@ -135,7 +134,7 @@ df_map.dtypes
 
 df_map["経過日数"] = (dt_now - df_map["更新日時"]).dt.days
 
-df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=True)
+df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=False)
 
 # 地図
 

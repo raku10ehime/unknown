@@ -77,7 +77,9 @@ df_ehime
 
 # エリアマップ
 
-def enblcid_split(df0):
+def enblcid_split(df_tmp):
+    
+    df0 = df_tmp.copy()
 
     df0["eNB-LCID"] = df0["eNB-LCID"].str.split()
     df1 = df0.explode("eNB-LCID")
@@ -88,7 +90,6 @@ def enblcid_split(df0):
     df2 = df1.explode("LCID").astype({"eNB": int, "LCID": int})
 
     df2["cell"] = df2.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
-    df2[["lat", "lon"]] = df2["地図"].str.split(",", expand=True).astype(float)
 
     df3 = df2.sort_values(["cell"]).reset_index(drop=True)
 
@@ -102,6 +103,8 @@ csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN5xiHhlnPTkv3auHkY
 df_csv = pd.read_csv(
     csv_url, parse_dates=["更新日時"], usecols=["ID", "更新日時", "場所", "eNB-LCID", "地図"]
 ).dropna(how="all")
+
+df_csv[["lat", "lon"]] = df_csv["地図"].str.split(",", expand=True).astype(float)
 
 df_enb = (
     enblcid_split(df_csv.dropna(subset=["eNB-LCID"]))

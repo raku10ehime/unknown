@@ -129,8 +129,13 @@ unknown = df_ehime.drop(set(idx)).copy()
 base = ehime.plot(color="white", edgecolor="black")
 unknown.plot(ax=base, marker="o", color="red", markersize=5)
 
-df_map = pd.read_csv("https://raku10ehime.github.io/map/ehime.csv", index_col=0).dropna(how="all")
-df_map["eNB-LCID"] = df_map["eNB-LCID"].fillna("unknown")
+df_map = pd.read_csv("https://raku10ehime.github.io/map/ehime.csv", index_col=0, parse_dates=["更新日時"]).dropna(how="all")
+
+df_map.dtypes
+
+df_map["経過日数"] = (dt_now - df_map["更新日時"]).dt.days
+
+df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=False)
 
 # 地図
 
@@ -180,8 +185,10 @@ for i, r in unknown.iterrows():
     )
 
 fg2 = folium.FeatureGroup(name="基地局").add_to(map)
+fg3 = folium.FeatureGroup(name="").add_to(map)
 
 for i, r in df_map.iterrows():
+
     fg2.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
@@ -193,10 +200,22 @@ for i, r in df_map.iterrows():
         )
     )
 
+    fg3.add_child(
+        folium.Marker(
+            location=[r["緯度"], r["経度"]],
+            popup=folium.Popup(
+                f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
+                max_width=300,
+            ),
+            icon=folium.plugins.BeautifyIcon(icon_shape="circle-dot", border_width=5, border_color=r["past_days"]),
+        )
+    )
+
 folium.LayerControl().add_to(map)
 folium.plugins.LocateControl().add_to(map)
 
 # map
 
 map_path = pathlib.Path("map", "index.html")
+map_path.parent.mkdir(parents=True, exist_ok=True)
 map.save(map_path)

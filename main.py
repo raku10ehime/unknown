@@ -135,7 +135,7 @@ df_map.dtypes
 
 df_map["経過日数"] = (dt_now - df_map["更新日時"]).dt.days
 
-df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=False)
+df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=True)
 
 # 地図
 

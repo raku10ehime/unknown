@@ -187,7 +187,7 @@ for i, r in unknown.iterrows():
     )
 
 fg2 = folium.FeatureGroup(name="基地局").add_to(map)
-fg3 = folium.FeatureGroup(name="").add_to(map)
+fg3 = folium.FeatureGroup(name="経過日数").add_to(map)
 
 for i, r in df_map.iterrows():
 

@@ -7,28 +7,13 @@ import pandas as pd
 
 import pyproj
 
+pd.set_option("display.max_columns", None)
+
 # MLS
 
-df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json")
-
-# cellからeNB-LCIDを作成
-
-df_mls[["eNB", "LCID"]] = df_mls["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
-
-# 日時に変換
-
-df_mls["created"] = pd.to_datetime(df_mls["created"], unit="s")
-df_mls["updated"] = pd.to_datetime(df_mls["updated"], unit="s")
-
-# 90日以内
-
-dt_now = (
-    pd.Timestamp.now(tz="Asia/Tokyo")
-    .tz_localize(None)
+df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json").query(
+    "188743680 <= cell < 190023680"
 )
-
-dt_90d = dt_now - pd.Timedelta(days=90)
-df_mls = df_mls[df_mls["updated"] > dt_90d].query("737280 <= eNB < 742280")
 
 # 緯度経度をgeometryに変換
 
@@ -50,59 +35,71 @@ ehime = gpd.read_file("N03-20220101_38_GML.zip").rename(
 
 spj = gpd.sjoin(pt_df, ehime)
 
+# 日時に変換
+
+spj["created"] = pd.to_datetime(spj["created"], unit="s")
+spj["updated"] = pd.to_datetime(spj["updated"], unit="s")
+
+spj[["eNB", "LCID"]] = spj["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
+
 spj["id"] = spj["eNB"].astype(str) + "-" + spj["LCID"].astype(str)
 
 base = ehime.plot(color="white", edgecolor="black")
 spj.plot(ax=base, marker="o", color="red", markersize=5)
 
-df_ehime = spj.reindex(
-    columns=[
-        "area",
-        "lat",
-        "lon",
-        "created",
-        "updated",
-        "cell",
-        "id",
-        "eNB",
-        "LCID",
-        "geometry",
-        "市区町村名",
-    ]
-).query("737280 <= eNB < 742280")
+spj
 
-df_ehime.reset_index(drop=True, inplace=True)
+spj.columns
+
+df_ehime = (
+    spj.sort_values(by=["updated", "cell"])
+    .drop_duplicates(subset=["cell"], keep="last")
+    .reindex(
+        columns=[
+            "area",
+            "lat",
+            "lon",
+            "created",
+            "updated",
+            "cell",
+            "eNB",
+            "LCID",
+            "id",
+            "市区町村名",
+        ]
+    )
+    .sort_values(by="cell")
+    .reset_index(drop=True)
+)
 
 df_ehime
 
-# エリアマップ
 
 def enblcid_split(df_tmp):
-    
-    df0 = df_tmp.copy()
+    df1 = df_tmp.copy()
 
-    df0["eNB-LCID"] = df0["eNB-LCID"].str.split()
-    df1 = df0.explode("eNB-LCID")
+    df1["eNB-LCID"] = df1["eNB-LCID"].str.split()
+    df2 = df1.explode("eNB-LCID")
 
-    df1[["eNB", "LCID"]] = df1["eNB-LCID"].str.split("-", expand=True)
+    df2[["eNB", "LCID"]] = df2["eNB-LCID"].str.split("-", expand=True)
 
-    df1["LCID"] = df1["LCID"].str.split(",")
-    df2 = df1.explode("LCID").astype({"eNB": int, "LCID": int})
+    df2["LCID"] = df2["LCID"].str.split(",")
+    df3 = df2.explode("LCID").astype({"eNB": int, "LCID": int})
 
-    df2["cell"] = df2.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
+    df3["cell"] = df3.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
 
-    df3 = df2.sort_values(["cell"]).reset_index(drop=True)
+    df3 = df3.sort_values(["cell"]).reset_index(drop=True)
 
     return df3
 
-# CSV
 
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN5xiHhlnPTkv3auHkYLT9NPvvjayj5AdPrH5VBQdbELOzfONi236Vub6eSshv8jAxQw3V1rgbbgE/pub?gid=882951423&single=true&output=csv"
-
 
 df_csv = pd.read_csv(
     csv_url, parse_dates=["更新日時"], usecols=["ID", "更新日時", "場所", "eNB-LCID", "地図"]
 ).dropna(how="all")
+
+df_csv
 
 df_csv[["lat", "lon"]] = df_csv["地図"].str.split(",", expand=True).astype(float)
 
@@ -128,16 +125,61 @@ for i, r in df_ehime.iterrows():
 
 unknown = df_ehime.drop(set(idx)).copy()
 
-base = ehime.plot(color="white", edgecolor="black")
-unknown.plot(ax=base, marker="o", color="red", markersize=5)
+unknown.dtypes
 
-df_map = pd.read_csv("https://raku10ehime.github.io/map/ehime.csv", index_col=0, parse_dates=["更新日時"]).dropna(how="all")
+unknown
 
-df_map.dtypes
+df0 = (
+    pd.read_csv(
+        "https://raku10ehime.github.io/map/ehime.csv", index_col=0, parse_dates=["更新日時"]
+    )
+    .dropna(how="all")
+    .dropna(subset=["eNB-LCID"])
+)
 
-df_map["経過日数"] = (dt_now - df_map["更新日時"]).dt.days
+df_map = enblcid_split(df0).sort_values(by=["cell", "更新日時"]).reset_index(drop=True)
 
-df_map["past_days"] = pd.cut(df_map["経過日数"], [0, 90, 180, 360, 720, 99999], labels=["green", "yellow", "orange", "red", "black"], right=False)
+df_map
+
+df1 = pd.merge(df_map, df_ehime, on="cell", how="left")
+
+df1[["eNB", "LCID"]] = df1["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
+df1["id"] = df1["eNB"].astype(str) + "-" + df1["LCID"].astype(str)
+
+grs80 = pyproj.Geod(ellps="GRS80")
+
+df1["距離"] = df1.apply(lambda x: grs80.inv(x["経度"], x["緯度"], x.lon, x.lat)[2], axis=1)
+
+df1["更新日時"].mask(
+    ((df1["更新日時"] < df1.updated) & (df1["距離"] < 2000)), df1.updated, inplace=True
+)
+
+dt_now = pd.Timestamp.now(tz="Asia/Tokyo").tz_localize(None)
+
+df1["経過日数"] = (dt_now - df1["更新日時"]).dt.days
+
+df1.sort_values(by=["cell"], inplace=True)
+
+df1
+
+df2 = (
+    df1.groupby(by=["場所", "eNB-LCID", "緯度", "経度", "color", "icon"])
+    .agg({"更新日時": [min, list], "経過日数": max})
+    .droplevel(level=0, axis=1)
+    .rename(columns={"min": "update", "list": "更新日時", "max": "経過日数"})
+    .reset_index()
+)
+
+df2["更新日時"] = df2["更新日時"].apply(lambda x: "\n".join(i.strftime("%Y/%m/%d") for i in x))
+
+df2["past_days"] = pd.cut(
+    df2["経過日数"],
+    [0, 90, 180, 360, 720, 99999],
+    labels=["green", "yellow", "orange", "red", "black"],
+    right=False,
+)
+
+df2
 
 # 地図
 
@@ -164,7 +206,7 @@ folium.raster_layers.TileLayer(
 
 folium.raster_layers.TileLayer(
     name="楽天モバイル",
-    tiles="https://area-map.mobile.rakuten.co.jp/dsd/geoserver/4g4m/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20220516",
+    tiles="https://area-map.mobile.rakuten.co.jp/dsd/geoserver/4g4m/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20220404",
     fmt="image/png",
     attr="楽天モバイルエリア",
     tms=False,
@@ -189,8 +231,7 @@ for i, r in unknown.iterrows():
 fg2 = folium.FeatureGroup(name="基地局").add_to(map)
 fg3 = folium.FeatureGroup(name="経過日数").add_to(map)
 
-for i, r in df_map.iterrows():
-
+for i, r in df2.iterrows():
     fg2.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
@@ -205,11 +246,9 @@ for i, r in df_map.iterrows():
     fg3.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
-            popup=folium.Popup(
-                f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
-                max_width=300,
+            icon=folium.plugins.BeautifyIcon(
+                icon_shape="circle-dot", border_width=5, border_color=r["past_days"]
             ),
-            icon=folium.plugins.BeautifyIcon(icon_shape="circle-dot", border_width=5, border_color=r["past_days"]),
         )
     )
 

@@ -37,6 +37,8 @@ spj = gpd.sjoin(pt_df, ehime)
 
 # 日時に変換
 
+dt_now = pd.Timestamp.now(tz="Asia/Tokyo").tz_localize(None)
+
 spj["created"] = pd.to_datetime(spj["created"], unit="s")
 spj["updated"] = pd.to_datetime(spj["updated"], unit="s")
 
@@ -50,6 +52,8 @@ spj.plot(ax=base, marker="o", color="red", markersize=5)
 spj
 
 spj.columns
+
+spj["経過日数"] = (dt_now - spj["updated"]).dt.days
 
 df_ehime = (
     spj.sort_values(by=["updated", "cell"])
@@ -66,6 +70,7 @@ df_ehime = (
             "LCID",
             "id",
             "市区町村名",
+            "経過日数",
         ]
     )
     .sort_values(by="cell")
@@ -121,7 +126,8 @@ for i, r in df_ehime.iterrows():
         n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
 
         if n < 3000:
-            idx.append(i)
+            if r["経過日数"] > 90:
+                idx.append(i)
 
 unknown = df_ehime.drop(set(idx)).copy()
 
@@ -152,8 +158,6 @@ df1["距離"] = df1.apply(lambda x: grs80.inv(x["経度"], x["緯度"], x.lon, x
 df1["更新日時"].mask(
     ((df1["更新日時"] < df1.updated) & (df1["距離"] < 2000)), df1.updated, inplace=True
 )
-
-dt_now = pd.Timestamp.now(tz="Asia/Tokyo").tz_localize(None)
 
 df1["経過日数"] = (dt_now - df1["更新日時"]).dt.days
 

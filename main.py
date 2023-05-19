@@ -76,21 +76,21 @@ df_ehime
 
 
 def enblcid_split(df_tmp):
-    df1 = df_tmp.copy()
+    df0 = df_tmp.copy()
 
-    df1["eNB-LCID"] = df1["eNB-LCID"].str.split()
-    df2 = df1.explode("eNB-LCID")
+    df0["eNB-LCID"] = df0["eNB-LCID"].str.split()
+    df1 = df0.explode("eNB-LCID")
 
-    df2[["eNB", "LCID"]] = df2["eNB-LCID"].str.split("-", expand=True)
+    df1[["eNB", "LCID"]] = df1["eNB-LCID"].str.split("-", expand=True)
 
-    df2["LCID"] = df2["LCID"].str.split(",")
-    df3 = df2.explode("LCID").astype({"eNB": int, "LCID": int})
+    df1["LCID"] = df1["LCID"].str.split(",")
+    df2 = df1.explode("LCID").astype({"eNB": int, "LCID": int})
 
-    df3["cell"] = df3.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
+    df2["cell"] = df2.apply(lambda x: (x["eNB"] << 8) | x["LCID"], axis=1)
 
-    df3 = df3.sort_values(["cell"]).reset_index(drop=True)
+    df2 = df2.sort_values(["cell"]).reset_index(drop=True)
 
-    return df3
+    return df2
 
 
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN5xiHhlnPTkv3auHkYLT9NPvvjayj5AdPrH5VBQdbELOzfONi236Vub6eSshv8jAxQw3V1rgbbgE/pub?gid=882951423&single=true&output=csv"
@@ -134,10 +134,9 @@ df0 = (
         "https://raku10ehime.github.io/map/ehime.csv", index_col=0, parse_dates=["更新日時"]
     )
     .dropna(how="all")
-    .dropna(subset=["eNB-LCID"])
 )
 
-df_map = enblcid_split(df0).sort_values(by=["cell", "更新日時"]).reset_index(drop=True)
+df_map = enblcid_split(df0.dropna(subset=["eNB-LCID"])).sort_values(by=["cell", "更新日時"]).reset_index(drop=True)
 
 df_map
 
@@ -229,9 +228,8 @@ for i, r in unknown.iterrows():
     )
 
 fg2 = folium.FeatureGroup(name="基地局").add_to(map)
-fg3 = folium.FeatureGroup(name="経過日数").add_to(map)
 
-for i, r in df2.iterrows():
+for i, r in df0.iterrows():
     fg2.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
@@ -243,6 +241,9 @@ for i, r in df2.iterrows():
         )
     )
 
+fg3 = folium.FeatureGroup(name="経過日数").add_to(map)
+
+for i, r in df2.iterrows():
     fg3.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],

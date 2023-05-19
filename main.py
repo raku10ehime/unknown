@@ -248,10 +248,10 @@ for i, r in df2.iterrows():
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(
-                f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
+                f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{"<br />".join(r["更新日時"].split())}</p>',
                 max_width=300,
             ),
-            tooltip=f'<p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
+            tooltip=f'<p>{r["eNB-LCID"]}</p><p>{"<br />".join(r["更新日時"].split())}</p>',
             icon=folium.plugins.BeautifyIcon(
                 icon_shape="circle-dot", border_width=5, border_color=r["past_days"]
             ),

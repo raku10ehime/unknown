@@ -125,14 +125,13 @@ for i, r in df_ehime.iterrows():
     for j, t in df_tmp.iterrows():
         n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
 
-        if (n < 3000) or (r["経過日数"] > 90):
+        if n < 3000:
             idx.append(i)
 
-unknown = df_ehime.drop(set(idx)).copy()
+dft = df_ehime.drop(set(idx)).copy()
 
-unknown.dtypes
-
-unknown
+# 180日以内
+unknown = dft[dft["経過日数"] < 180].copy()
 
 df0 = (
     pd.read_csv(

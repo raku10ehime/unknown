@@ -241,7 +241,7 @@ for i, r in df0.iterrows():
         )
     )
 
-fg3 = folium.FeatureGroup(name="経過日数").add_to(map)
+fg3 = folium.FeatureGroup(name="更新状況").add_to(map)
 
 for i, r in df2.iterrows():
     fg3.add_child(
@@ -251,6 +251,7 @@ for i, r in df2.iterrows():
                 f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
                 max_width=300,
             ),
+            tooltip=f'<p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
             icon=folium.plugins.BeautifyIcon(
                 icon_shape="circle-dot", border_width=5, border_color=r["past_days"]
             ),

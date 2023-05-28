@@ -152,7 +152,7 @@ grs80 = pyproj.Geod(ellps="GRS80")
 df1["距離"] = df1.apply(lambda x: grs80.inv(x["経度"], x["緯度"], x.lon, x.lat)[2], axis=1)
 
 df1["更新日時"].mask(
-    ((df1["更新日時"] < df1.updated) & (df1["距離"] < 5000)), df1.updated, inplace=True
+    ((df1["更新日時"] < df1.updated) & (df1["距離"] < 3000)), df1.updated, inplace=True
 )
 
 df1["経過日数"] = (dt_now - df1["更新日時"]).dt.days

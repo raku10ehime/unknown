@@ -15,48 +15,21 @@ df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json").query(
     "188743680 <= cell < 190023680"
 )
 
-# 緯度経度をgeometryに変換
-
-pt_df = gpd.GeoDataFrame(
-    df_mls, geometry=gpd.points_from_xy(df_mls.lon, df_mls.lat), crs="EPSG:6668"
-)
-
-ehime = gpd.read_file("N03-20220101_38_GML.zip").rename(
-    columns={
-        "N03_001": "都道府県名",
-        "N03_002": "支庁・振興局名",
-        "N03_003": "郡・政令都市名",
-        "N03_004": "市区町村名",
-        "N03_007": "行政区域コード",
-    }
-)
-
-# geometryから市町村名を取得
-
-spj = gpd.sjoin(pt_df, ehime)
-
 # 日時に変換
 
 dt_now = pd.Timestamp.now(tz="Asia/Tokyo").tz_localize(None)
 
-spj["created"] = pd.to_datetime(spj["created"], unit="s")
-spj["updated"] = pd.to_datetime(spj["updated"], unit="s")
+df_mls["created"] = pd.to_datetime(df_mls["created"], unit="s")
+df_mls["updated"] = pd.to_datetime(df_mls["updated"], unit="s")
 
-spj[["eNB", "LCID"]] = spj["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
+df_mls[["eNB", "LCID"]] = df_mls["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
 
-spj["id"] = spj["eNB"].astype(str) + "-" + spj["LCID"].astype(str)
+df_mls["id"] = df_mls["eNB"].astype(str) + "-" + df_mls["LCID"].astype(str)
 
-base = ehime.plot(color="white", edgecolor="black")
-spj.plot(ax=base, marker="o", color="red", markersize=5)
-
-spj
-
-spj.columns
-
-spj["経過日数"] = (dt_now - spj["updated"]).dt.days
+df_mls["経過日数"] = (dt_now - df_mls["updated"]).dt.days
 
 df_ehime = (
-    spj.sort_values(by=["updated", "cell"])
+    df_mls.sort_values(by=["updated", "cell"])
     .drop_duplicates(subset=["cell"], keep="last")
     .reindex(
         columns=[
@@ -79,7 +52,6 @@ df_ehime = (
 
 df_ehime
 
-
 def enblcid_split(df_tmp):
     df0 = df_tmp.copy()
 
@@ -96,7 +68,6 @@ def enblcid_split(df_tmp):
     df2 = df2.sort_values(["cell"]).reset_index(drop=True)
 
     return df2
-
 
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuN5xiHhlnPTkv3auHkYLT9NPvvjayj5AdPrH5VBQdbELOzfONi236Vub6eSshv8jAxQw3V1rgbbgE/pub?gid=882951423&single=true&output=csv"
 
@@ -149,7 +120,6 @@ df1 = pd.merge(df_map, df_ehime, on="cell", how="left")
 df1[["eNB", "LCID"]] = df1["cell"].apply(lambda x: pd.Series([x >> 8, x & 0xFF]))
 df1["id"] = df1["eNB"].astype(str) + "-" + df1["LCID"].astype(str)
 
-grs80 = pyproj.Geod(ellps="GRS80")
 
 df1["距離"] = df1.apply(lambda x: grs80.inv(x["経度"], x["緯度"], x.lon, x.lat)[2], axis=1)
 

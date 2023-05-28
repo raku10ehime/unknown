@@ -11,9 +11,7 @@ pd.set_option("display.max_columns", None)
 
 # MLS
 
-df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json").query(
-    "188743680 <= cell < 190023680"
-)
+df_mls = pd.read_csv("mls_44011.csv", names=["area", "cell", "unit", "lon", "lat", "range", "samples", "created", "updated"])
 
 # 緯度経度をgeometryに変換
 

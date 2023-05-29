@@ -177,7 +177,7 @@ folium.raster_layers.TileLayer(
 
 folium.raster_layers.TileLayer(
     name="楽天モバイル",
-    tiles="https://area-map.mobile.rakuten.co.jp/dsd/geoserver/4g4m/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20220404",
+    tiles="https://area-map.mobile.rakuten.co.jp/dsd/geoserver/4g4m/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20220516",
     fmt="image/png",
     attr="楽天モバイルエリア",
     tms=False,

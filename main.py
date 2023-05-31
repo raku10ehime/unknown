@@ -192,7 +192,7 @@ folium.raster_layers.TileLayer(
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 
 for i, r in unknown.iterrows():
-    color = "yellow" if r["distance"] else colors.get(r["LCID"] % 6)
+    color = colors.get(r["LCID"] % 6) if pd.isnull(r["distance"]) else "yellow"
     
     fg1.add_child(
         folium.Circle(
@@ -215,6 +215,7 @@ for i, r in df0.iterrows():
                 max_width=300,
             ),
             icon=folium.Icon(color=r.color, icon=r.icon),
+            place=r["場所"],
         )
     )
 

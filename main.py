@@ -95,6 +95,7 @@ for i, r in df_ehime.iterrows():
 
     for j, t in df_tmp.iterrows():
         n = grs80.inv(r.lon, r.lat, t.lon, t.lat)[2]
+        df_ehime.at[i, "distance"] = n
 
         if n < 5000:
             idx.append(i)
@@ -192,8 +193,8 @@ for i, r in unknown.iterrows():
     fg1.add_child(
         folium.Circle(
             location=[r.lat, r.lon],
-            popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p>', max_width=300),
-            tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p>',
+            popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["distance"]}</p>', max_width=300),
+            tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["distance"]}</p>',
             radius=800,
             color=colors.get(r["LCID"] % 6),
         )

@@ -235,12 +235,13 @@ for i, r in df2.iterrows():
 
 # 検索
 folium.plugins.Search(
-    layer=fg1,
+    layer=fg2,
     geom_type="Point",
     placeholder="場所検索",
     collapsed=True,
     search_label="place",
 ).add_to(map)
+
 folium.LayerControl().add_to(map)
 folium.plugins.LocateControl().add_to(map)
 

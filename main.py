@@ -192,13 +192,15 @@ folium.raster_layers.TileLayer(
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 
 for i, r in unknown.iterrows():
+    color = "yellow" if r["distance"] else colors.get(r["LCID"] % 6)
+    
     fg1.add_child(
         folium.Circle(
             location=[r.lat, r.lon],
             popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>', max_width=300),
             tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>',
             radius=800,
-            color=colors.get(r["LCID"] % 6),
+            color=color,
         )
     )
 

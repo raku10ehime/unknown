@@ -190,24 +190,35 @@ folium.raster_layers.TileLayer(
 ).add_to(map)
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
+fg2 = folium.FeatureGroup(name="エリア外").add_to(map)
 
 for i, r in unknown.iterrows():
-    color = colors.get(r["LCID"] % 6) if pd.isnull(r["distance"]) else "yellow"
     
-    fg1.add_child(
-        folium.Circle(
-            location=[r.lat, r.lon],
-            popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>', max_width=300),
-            tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>',
-            radius=800,
-            color=color,
+    if pd.isnull(r["distance"]):
+    
+        fg1.add_child(
+            folium.Circle(
+                location=[r.lat, r.lon],
+                popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>', max_width=300),
+                tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>',
+                radius=800,
+                color=colors.get(r["LCID"] % 6),
+            )
         )
-    )
-
-fg2 = folium.FeatureGroup(name="基地局").add_to(map)
+    else
+        fg2.add_child(
+            folium.Circle(
+                location=[r.lat, r.lon],
+                popup=folium.Popup(f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>', max_width=300),
+                tooltip=f'<p>{r["id"]}</p><p>{r["updated"]}</p><p>{r["name"]}</p><p>{r["distance"]}</p>',
+                radius=800,
+                color="yellow",
+            )
+        )
+fg3 = folium.FeatureGroup(name="基地局").add_to(map)
 
 for i, r in df0.iterrows():
-    fg2.add_child(
+    fg3.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(
@@ -219,10 +230,10 @@ for i, r in df0.iterrows():
         )
     )
 
-fg3 = folium.FeatureGroup(name="更新状況").add_to(map)
+fg4 = folium.FeatureGroup(name="更新状況").add_to(map)
 
 for i, r in df2.iterrows():
-    fg3.add_child(
+    fg4.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(
@@ -238,7 +249,7 @@ for i, r in df2.iterrows():
 
 # 検索
 folium.plugins.Search(
-    layer=fg2,
+    layer=fg3,
     geom_type="Point",
     placeholder="場所検索",
     collapsed=True,

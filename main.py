@@ -205,7 +205,7 @@ for i, r in unknown.iterrows():
                 color=colors.get(r["LCID"] % 6),
             )
         )
-    else
+    else:
         fg2.add_child(
             folium.Circle(
                 location=[r.lat, r.lon],

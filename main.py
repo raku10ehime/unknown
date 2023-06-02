@@ -158,10 +158,10 @@ df2
 # 地図
 
 colors = {
-    0: "darkbule",
+    0: "darkblue",
     1: "lightred",
     2: "lightgreen",
-    3: "lightbule",
+    3: "lightblue",
     4: "darkred",
     5: "darkgreen",
 }

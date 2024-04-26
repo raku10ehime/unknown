@@ -11,7 +11,7 @@ pd.set_option("display.max_columns", None)
 
 # MLS
 
-df_mls = pd.read_json("https://cellmap.rukihena.com/mls44011.json").query(
+df_mls = pd.read_json("https://mls.js2hgw.com/cellmap/mls44011.json").query(
     "188743680 <= cell < 190023680"
 )
 
@@ -180,7 +180,7 @@ folium.raster_layers.TileLayer(
 
 folium.raster_layers.TileLayer(
     name="楽天モバイル",
-    tiles="https://area-map.mobile.rakuten.co.jp/dsd/geoserver/4g4m/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20220516",
+    tiles="https://area-map.mobile.rakuten.co.jp/5gs/geoserver/5g/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20231130",
     fmt="image/png",
     attr="楽天モバイルエリア",
     tms=False,

@@ -2,7 +2,7 @@ name: Python application
 
 on:
   repository_dispatch:
-    types: [on-map-update]
+    types: [on-unknown-update]
   schedule:
     - cron:  '0 21 * * *'
   workflow_dispatch:

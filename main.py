@@ -221,7 +221,7 @@ for i, r in df0.iterrows():
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(
-                f'<p>{tag_map}</p><p>{r["経度"]}, {r["緯度"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
+                f'<p>{tag_map}</p><p>{r["緯度"]}, {r["経度"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
                 max_width=300,
             ),
             icon=folium.Icon(color=r.color, icon=r.icon),

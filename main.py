@@ -216,11 +216,12 @@ for i, r in unknown.iterrows():
 fg3 = folium.FeatureGroup(name="基地局").add_to(map)
 
 for i, r in df0.iterrows():
+    tag_map = f'<a href="https://www.google.com/maps?layer=c&cbll={r["緯度"]},{r["経度"]}" target="_blank" rel="noopener noreferrer">{r["場所"]}</a>'
     fg3.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(
-                f'<p>{r["場所"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
+                f'<p>{tag_map}</p><p>{r["経度"]}, {r["緯度"]}</p><p>{r["eNB-LCID"]}</p><p>{r["更新日時"]}</p>',
                 max_width=300,
             ),
             icon=folium.Icon(color=r.color, icon=r.icon),

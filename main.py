@@ -258,6 +258,9 @@ folium.plugins.Search(
 folium.LayerControl().add_to(map)
 folium.plugins.LocateControl().add_to(map)
 
+# クリック位置の緯度・経度表示
+map.add_child(folium.LatLngPopup())
+
 # map
 
 map_path = pathlib.Path("map", "index.html")

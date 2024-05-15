@@ -189,7 +189,7 @@ folium.raster_layers.TileLayer(
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 fg2 = folium.FeatureGroup(name="エリア外").add_to(map)
-fg3 = folium.FeatureGroup(name="基地局", show=False).add_to(map)
+fg3 = folium.FeatureGroup(name="基地局").add_to(map)
 fg4 = folium.FeatureGroup(name="更新状況").add_to(map)
 
 for i, r in unknown.iterrows():

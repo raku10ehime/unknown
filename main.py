@@ -213,7 +213,7 @@ for i, r in unknown.iterrows():
                 color="yellow",
             )
         )
-fg3 = folium.FeatureGroup(name="基地局").add_to(map)
+fg3 = folium.FeatureGroup(name="基地局", show=False).add_to(map)
 
 for i, r in df0.iterrows():
     tag_map = f'<a href="https://www.google.com/maps?layer=c&cbll={r["緯度"]},{r["経度"]}" target="_blank" rel="noopener noreferrer">{r["場所"]}</a>'

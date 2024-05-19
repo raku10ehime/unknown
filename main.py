@@ -198,6 +198,17 @@ folium.raster_layers.TileLayer(
     opacity=1,
 ).add_to(map)
 
+folium.raster_layers.TileLayer(
+    name="au Band3",
+    tiles="https://area.uqcom.jp/api2/4G_17/{z}/{x}/{y}.png",
+    fmt="image/png",
+    attr="au Band3エリア",
+    tms=False,
+    overlay=True,
+    control=True,
+    opacity=1,
+).add_to(map)
+
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 fg2 = folium.FeatureGroup(name="エリア外").add_to(map)
 fg3 = folium.FeatureGroup(name="基地局").add_to(map)

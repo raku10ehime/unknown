@@ -213,7 +213,8 @@ folium.raster_layers.TileLayer(
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 fg2 = folium.FeatureGroup(name="エリア外").add_to(map)
 fg3 = folium.FeatureGroup(name="基地局").add_to(map)
-fg4 = folium.FeatureGroup(name="更新状況").add_to(map)
+fg4 = folium.FeatureGroup(name="サークル").add_to(map)
+fg5 = folium.FeatureGroup(name="更新状況").add_to(map)
 
 for i, r in unknown.iterrows():
     
@@ -253,8 +254,27 @@ for i, r in df0.iterrows():
         )
     )
 
+    radius = 780
+    
+    if r["設置タイプ"] == "屋内":
+        radius = 78
+    elif r["設置タイプ"] == "ピコセル":
+        radius = 312
+
+    if r["状況"] != "delete":
+        fg4.add_child(
+            folium.Circle(
+                location=[r["緯度"], r["経度"]],
+                radius=radius,
+                color="black",
+                weight = 1,
+                fill=True,
+                fill_opacity=0.5,
+            )
+        )
+
 for i, r in df2.iterrows():
-    fg4.add_child(
+    fg5.add_child(
         folium.Marker(
             location=[r["緯度"], r["経度"]],
             popup=folium.Popup(

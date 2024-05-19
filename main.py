@@ -207,7 +207,7 @@ folium.raster_layers.TileLayer(
     tms=False,
     overlay=True,
     control=True,
-    opacity=1,
+    opacity=0.5,
 ).add_to(map)
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)

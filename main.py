@@ -2,6 +2,8 @@ import pathlib
 
 import folium
 import folium.plugins
+from folium_vectortilelayer import VectorTileLayer
+
 import geopandas as gpd
 import pandas as pd
 

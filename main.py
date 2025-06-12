@@ -176,39 +176,32 @@ folium.raster_layers.TileLayer(
     attr='&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
 ).add_to(map)
 
-folium.raster_layers.TileLayer(
+folium.raster_layers.WmsTileLayer(
+    url="https://area-map.rmb-ss.jp/turbo",
+    layers="turbo",
     name="楽天モバイル",
-    tiles="https://area-map.mobile.rakuten.co.jp/5gs/geoserver/5g/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&x={x}&y={y}&zoom={z}&update=20231130",
     fmt="image/png",
-    attr="楽天モバイルエリア",
-    tms=False,
+    transparent=True,
     overlay=True,
     control=True,
-    opacity=1,
+    opacity=1.0,
     show=False,
+    attr="<a href='https://network.mobile.rakuten.co.jp/'>楽天モバイル</a>",
 ).add_to(map)
 
-folium.raster_layers.TileLayer(
-    name="楽天モバイル（自社）",
-    tiles="https://area-map.mobile.rakuten.co.jp/turbo/geoserver/4g/mno_coverage_map/gwc/service/gmaps?LAYERS=mno_coverage_map:all_map&FORMAT=image/png&TRANSPARENT=TRUE&&x={x}&y={y}&zoom={z}",
-    fmt="image/png",
-    attr="楽天モバイル（自社）",
-    tms=False,
-    overlay=True,
-    control=True,
-    opacity=1,
-).add_to(map)
+options = {
+    "vectorTileLayerStyles": {
+        "next_rakuten": {
+            "fill": True,
+            "weight": 0,
+            "fillColor": "orange",
+            "fillOpacity": 0.4,
+        },
+    }
+}
 
-folium.raster_layers.TileLayer(
-    name="au Band3",
-    tiles="https://area.uqcom.jp/api2/4G_17/{z}/{x}/{y}.png",
-    fmt="image/png",
-    attr="au Band3エリア",
-    tms=False,
-    overlay=True,
-    control=True,
-    opacity=0.5,
-    show=False,
+VectorTileLayer(
+    "https://area.uqcom.jp/api3/next_rakuten/{z}/{x}/{y}.mvt", "auローミング", options
 ).add_to(map)
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)

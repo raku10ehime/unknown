@@ -1,3 +1,4 @@
+import io
 import bz2
 import pathlib
 import requests
@@ -19,7 +20,7 @@ bz2_url = "https://mls.js2hgw.com/cellmap/mls44011.json.bz2"
 r = requests.get(bz2_url)
 data = bz2.decompress(r.content)
 
-df_mls = pd.read_json(data).query(
+df_mls = pd.read_json(io.BytesIO(data)).query(
     "188743680 <= cell < 190023680"
 )
 

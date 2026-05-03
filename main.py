@@ -17,7 +17,7 @@ pd.set_option("display.max_columns", None)
 
 bz2_url = "https://mls.js2hgw.com/cellmap/mls44011.json.bz2"
 r = requests.get(bz2_url)
-data = bz2.decompress(resp.content)
+data = bz2.decompress(r.content)
 
 df_mls = pd.read_json(data).query(
     "188743680 <= cell < 190023680"

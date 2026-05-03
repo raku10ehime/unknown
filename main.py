@@ -17,7 +17,6 @@ pd.set_option("display.max_columns", None)
 
 mls_url ="https://44011.brave-hero.net/api/v1/csvexport?mcc=440&mnc=11&after={start}&cellid_after=188743680&cellid_before=190023680&mlscompatible=on"
 r = requests.get(mls_url)
-data = bz2.decompress(r.content)
 
 df_mls = pd.read_csv(io.BytesIO(r.content))
 

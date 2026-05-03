@@ -1,4 +1,6 @@
+import bz2
 import pathlib
+import requests
 
 import folium
 import folium.plugins
@@ -13,7 +15,11 @@ pd.set_option("display.max_columns", None)
 
 # MLS
 
-df_mls = pd.read_json("https://mls.js2hgw.com/cellmap/mls44011.json").query(
+bz2_url = "https://mls.js2hgw.com/cellmap/mls44011.json.bz2"
+r = requests.get(bz2_url)
+data = bz2.decompress(resp.content)
+
+df_mls = pd.read_json(data).query(
     "188743680 <= cell < 190023680"
 )
 

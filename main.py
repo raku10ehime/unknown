@@ -141,9 +141,9 @@ df1
 
 df2 = (
     df1.groupby(by=["場所", "eNB-LCID", "緯度", "経度", "color", "icon"])
-    .agg({"更新日時": [max, list], "経過日数": min})
+    .agg({"更新日時": [min, list], "経過日数": max})
     .droplevel(level=0, axis=1)
-    .rename(columns={"max": "update", "list": "更新日時", "min": "経過日数"})
+    .rename(columns={"min": "update", "list": "更新日時", "max": "経過日数"})
     .reset_index()
 )
 

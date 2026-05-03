@@ -2,4 +2,5 @@ folium
 folium-vectortilelayer
 geopandas
 pandas
+requests
 matplotlib

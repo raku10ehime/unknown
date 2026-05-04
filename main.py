@@ -151,7 +151,7 @@ df2["更新日時"] = df2["更新日時"].apply(lambda x: "\n".join(i.strftime("
 
 df2["past_days"] = pd.cut(
     df2["経過日数"],
-    [0, 90, 180, 360, 720, 99999],
+    [0, 180, 360, 720, 1800, 99999],
     labels=["green", "lime", "yellow", "red", "white"],
     right=False,
 )

@@ -194,19 +194,10 @@ folium.raster_layers.WmsTileLayer(
     attr="<a href='https://network.mobile.rakuten.co.jp/'>楽天モバイル</a>",
 ).add_to(map)
 
-options = {
-    "vectorTileLayerStyles": {
-        "next_rakuten": {
-            "fill": True,
-            "weight": 0,
-            "fillColor": "orange",
-            "fillOpacity": 0.4,
-        },
-    }
-}
-
-VectorTileLayer(
-    "https://area.uqcom.jp/api3/next_rakuten/{z}/{x}/{y}.mvt", "auローミング", options
+folium.raster_layers.TileLayer(
+    tiles="https://area.uqcom.jp/api3/F_ROAMING/{z}/{x}/{y}.png",
+    name="auローミング",
+    attr='&copy; <a href="https://area.uqcom.jp/roaming/">auローミング</a>',
 ).add_to(map)
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)

@@ -194,18 +194,20 @@ folium.raster_layers.WmsTileLayer(
     attr="<a href='https://network.mobile.rakuten.co.jp/'>楽天モバイル</a>",
 ).add_to(map)
 
-folium.raster_layers.TileLayer(
-    tiles="https://area.uqcom.jp/api3/F_ROAMING/{z}/{x}/{y}.png",
-    name="auローミング",
-    attr='&copy; <a href="https://area.uqcom.jp/roaming/">auローミング</a>',
-    opacity=0.5,
-).add_to(map)
 
+fg0 = folium.FeatureGroup(name="auローミング", show=False).add_to(map)
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
 fg2 = folium.FeatureGroup(name="エリア外").add_to(map)
 fg3 = folium.FeatureGroup(name="基地局", show=False).add_to(map)
 fg4 = folium.FeatureGroup(name="サークル", show=False).add_to(map)
 fg5 = folium.FeatureGroup(name="更新状況").add_to(map)
+
+folium.raster_layers.TileLayer(
+    tiles="https://area.uqcom.jp/api3/F_ROAMING/{z}/{x}/{y}.png",
+    name="auローミング",
+    attr='&copy; <a href="https://area.uqcom.jp/roaming/">auローミング</a>',
+    opacity=0.8,
+).add_to(fg0)
 
 for i, r in unknown.iterrows():
     

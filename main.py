@@ -198,6 +198,7 @@ folium.raster_layers.TileLayer(
     tiles="https://area.uqcom.jp/api3/F_ROAMING/{z}/{x}/{y}.png",
     name="auローミング",
     attr='&copy; <a href="https://area.uqcom.jp/roaming/">auローミング</a>',
+    opacity=0.5,
 ).add_to(map)
 
 fg1 = folium.FeatureGroup(name="未発見").add_to(map)
